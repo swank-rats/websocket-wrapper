@@ -22,5 +22,9 @@
   "homepage": "https://github.com/swank-rats/websocket-wrapper",
   "dependencies": {
     "ws": "*"
+  },
+  "devDependencies": {
+    "chai": "^1.9.2",
+    "mocha": "^2.0.1"
   }
 }
