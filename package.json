@@ -1,0 +1,23 @@
+{
+  "name": "websocket-wrapper",
+  "version": "0.1.0",
+  "description": "websocket wrapper for secure websocket connections",
+  "main": "app.js",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/swank-rats/websocket-wrapper.git"
+  },
+  "keywords": [
+    "websocket"
+  ],
+  "author": "Johannes Wachter <wachter.johannes@hotmail.com> (https://github.com/wachterjohannes)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/swank-rats/websocket-wrapper/issues"
+  },
+  "homepage": "https://github.com/swank-rats/websocket-wrapper"
+}
