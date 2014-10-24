@@ -20,8 +20,8 @@ var Websocket = require('ws').Server,
      */
     guid = function() {
         function _p8(s) {
-            var p = (Math.random().toString(16) + "000000000").substr(2, 8);
-            return s ? "-" + p.substr(0, 4) + "-" + p.substr(4, 4) : p;
+            var p = (Math.random().toString(16) + '000000000').substr(2, 8);
+            return s ? '-' + p.substr(0, 4) + '-' + p.substr(4, 4) : p;
         }
 
         return _p8() + _p8(true) + _p8(true) + _p8();
@@ -89,7 +89,7 @@ var Websocket = require('ws').Server,
         }
 
         var data = JSON.parse(message),
-            cmd = data.cmd || "default";
+            cmd = data.cmd || 'default';
 
         if (!!data.to && !!_listener.hasOwnProperty(data.to)) {
             _listener[data.to][cmd](socket, data.params || {}, data.data || {});
