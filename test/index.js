@@ -47,11 +47,11 @@ describe('#start', function() {
     });
 });
 
-describe('#registerListener', function() {
-    var websocket;
+describe('#listener', function() {
+    var websocket, wsInstance;
 
     beforeEach(function(done) {
-        var wsInstance = new ws('ws://localhost:8080');
+        wsInstance = new ws('ws://localhost:8080');
         websocket = new Websocket({port: 8080});
 
         wsInstance.on('open', function() {
@@ -63,19 +63,79 @@ describe('#registerListener', function() {
         websocket.stop();
     });
 
-    it('register listener', function() {
+    it('register', function() {
         var echoListener = {
-            default: function(socket, params, data) {
-                socket.send(socket.id + ':' + data);
-            }
-        };
+                default: function(socket, params, data) {
+                }
+            },
+            listener;
 
         websocket.registerListener('echo', echoListener);
-
-        var listener = websocket.getListener();
+        listener = websocket.getListener();
 
         expect(listener).not.to.be.null;
         expect(listener).to.have.property('echo');
         expect(listener.echo).to.be.equal(echoListener);
+    });
+
+    it('default callback', function(done) {
+        var echoListener = {
+            default: function() {
+                done();
+            }
+        };
+
+        websocket.registerListener('test', echoListener);
+
+        wsInstance.send(JSON.stringify({to: 'test'}));
+
+        setTimeout(function() {
+            done('default not called');
+        }, 100);
+    });
+
+    it('command callback', function(done) {
+        var echoListener = {
+            default: function(socket, params, data) {
+                done('wrong callback called');
+            },
+
+            test: function() {
+                done();
+            }
+        };
+
+        websocket.registerListener('test', echoListener);
+
+        wsInstance.send(JSON.stringify({to: 'test', cmd: 'test'}));
+
+        setTimeout(function() {
+            done('test not called');
+        }, 100);
+    });
+
+    it('parameter', function(done) {
+        var echoListener = {
+            default: function(socket, params, data) {
+
+                expect(socket).not.to.be.null;
+
+                expect(params).not.to.be.null;
+                expect(params).to.be.eql([1, 2, 3]);
+
+                expect(data).not.to.be.null;
+                expect(data).to.be.eql('testdata');
+
+                done();
+            }
+        };
+
+        websocket.registerListener('test', echoListener);
+
+        wsInstance.send(JSON.stringify({to: 'test', params: [1, 2, 3], data: 'testdata'}));
+
+        setTimeout(function() {
+            done('test not called');
+        }, 100);
     });
 });
