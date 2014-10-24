@@ -117,7 +117,6 @@ describe('#listener', function() {
     it('parameter', function(done) {
         var echoListener = {
             default: function(socket, params, data) {
-
                 expect(socket).not.to.be.null;
 
                 expect(params).not.to.be.null;
@@ -133,6 +132,28 @@ describe('#listener', function() {
         websocket.registerListener('test', echoListener);
 
         wsInstance.send(JSON.stringify({to: 'test', params: [1, 2, 3], data: 'testdata'}));
+
+        setTimeout(function() {
+            done('test not called');
+        }, 100);
+    });
+
+    it('send back', function(done) {
+        var echoListener = {
+            default: function(socket, params, data) {
+                socket.send(data);
+            }
+        };
+
+        websocket.registerListener('test', echoListener);
+
+        wsInstance.on('message', function(message) {
+            expect(message).to.be.eql('testdata');
+
+            done();
+        });
+
+        wsInstance.send(JSON.stringify({to: 'test', data: 'testdata'}));
 
         setTimeout(function() {
             done('test not called');
