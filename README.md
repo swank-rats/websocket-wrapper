@@ -58,7 +58,7 @@ var connection = new WebSocket('ws://localhost:8080');
 
 // When the connection is open, send some data to the server
 connection.onopen = function () {
-	connection.send(JSON.stringify({to: 'echo', data: 'testdata'}));
+	connection.send(JSON.stringify({to: 'test', cmd: 'echo', params: {toUpper: true}, data: 'testdata'}));
 };
 
 // Log messages from the server
