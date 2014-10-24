@@ -65,7 +65,7 @@ describe('#listener', function() {
 
     it('register', function() {
         var echoListener = {
-                default: function(socket, params, data) {
+                default: function() {
                 }
             },
             listener;
@@ -96,7 +96,7 @@ describe('#listener', function() {
 
     it('command callback', function(done) {
         var echoListener = {
-            default: function(socket, params, data) {
+            default: function() {
                 done('wrong callback called');
             },
 
