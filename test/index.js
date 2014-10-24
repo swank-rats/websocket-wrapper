@@ -156,7 +156,7 @@ describe('#listener', function() {
         wsInstance.send(JSON.stringify({to: 'test', data: 'testdata'}));
 
         setTimeout(function() {
-            done('test not called');
+            done('callback not called');
         }, 100);
     });
 });
