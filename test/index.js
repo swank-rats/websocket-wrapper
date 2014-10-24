@@ -1,5 +1,4 @@
 var chai = require('chai'),
-    sinon = require('sinon'),
     sinonChai = require('sinon-chai'),
     ws = require('ws'),
     http= require('http'),
@@ -202,3 +201,5 @@ describe('#listener', function() {
         }, 100);
     });
 });
+
+// TODO multiple listener
