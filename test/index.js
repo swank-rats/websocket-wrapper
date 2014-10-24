@@ -160,3 +160,45 @@ describe('#listener', function() {
         }, 100);
     });
 });
+
+
+describe('#listener', function() {
+    var websocket, wsInstance1, wsInstance2;
+
+    beforeEach(function(done) {
+        websocket = new Websocket({port: 8080});
+        wsInstance1 = new ws('ws://localhost:8080');
+
+        wsInstance1.on('open', function() {
+            wsInstance2 = new ws('ws://localhost:8080');
+
+            wsInstance2.on('open', function() {
+                done();
+            });
+        });
+    });
+
+    afterEach(function() {
+        websocket.stop();
+    });
+
+    it('multiple clients', function(done) {
+        wsInstance1.on('message', function(message) {
+            expect(message).to.be.eql('testdata');
+
+            wsInstance2.on('message', function(message) {
+                expect(message).to.be.eql('testdata');
+
+                done();
+            });
+
+            wsInstance2.send(JSON.stringify({to: 'test', data: message}));
+        });
+
+        wsInstance1.send(JSON.stringify({to: 'test', data: 'testdata'}));
+
+        setTimeout(function() {
+            done('callback not called');
+        }, 100);
+    });
+});
