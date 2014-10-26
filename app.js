@@ -103,7 +103,6 @@ var Websocket = require('ws').Server,
      * @param {Object} socket
      */
     onClose = function(socket) {
-        console.warn('closed: %s', socket.id);
     };
 
 module.exports = function(config) {
@@ -115,6 +114,22 @@ module.exports = function(config) {
      */
     this.registerListener = function(name, listener) {
         _listener[name] = listener;
+    };
+
+    /**
+     * Register a handle for following events:
+     *   - 'message': function(socket, message){return <boolean>;}
+     *     Return false ignores the message
+     *
+     * @param {string} eventName
+     * @param {function} handler
+     */
+    this.registerHandler = function(eventName, handler) {
+        if (!_handler.hasOwnProperty(eventName)) {
+            Console.warn('Event '+eventName + ' does not exists!');
+            return;
+        }
+        _handler[eventName].push(handler);
     };
 
     /**
