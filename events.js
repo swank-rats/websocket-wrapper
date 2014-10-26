@@ -12,6 +12,22 @@ var
     EVENT_TYPE_INFORM = 'inform',
 
     /**
+     * Factory for event objects
+     * @param {string} name
+     * @param {string} type
+     * @return {Event}
+     */
+    createEvent = function(name, type) {
+        if (type === EVENT_TYPE_VOTER) {
+            return new VoterEvent(name);
+        } else if (type === EVENT_TYPE_INFORM) {
+            return new InformEvent(name);
+        } else {
+            throw 'type not implemented';
+        }
+    },
+
+    /**
      * Prototype for event
      * @param {String} name
      * @param {String} type
@@ -36,6 +52,8 @@ var
          * @private
          */
         this._handlers = [];
+
+        return this;
     },
 
     /**
@@ -44,7 +62,20 @@ var
      * @constructor
      */
     VoterEvent = function(name) {
-        Event.call(name, EVENT_TYPE_VOTER);
+        Event.call(this, name, EVENT_TYPE_VOTER);
+
+        return this;
+    },
+
+    /**
+     * Prototype for voter-event
+     * @param {String} name
+     * @constructor
+     */
+    InformEvent = function(name) {
+        Event.call(this, name, EVENT_TYPE_INFORM);
+
+        return this;
     };
 
 /**
@@ -56,8 +87,12 @@ Event.prototype.register = function(handler) {
 };
 
 VoterEvent.prototype = Object.create(Event.prototype);
+VoterEvent.prototype.constructor = Event;
 
-module.exports = function(eventNames) {
+InformEvent.prototype = Object.create(Event.prototype);
+InformEvent.prototype.constructor = Event;
+
+module.exports = function() {
     /**
      * Constant type voter
      * @type {string}
@@ -69,21 +104,48 @@ module.exports = function(eventNames) {
      */
     this.EVENT_TYPE_INFORM = EVENT_TYPE_INFORM;
 
+
+    /**
+     * Container for events
+     * @type {Object}
+     * @private
+     */
+    this._events = {};
+
     /**
      * Register a callable event
-     * @param eventName
+     * @param {string} eventName
+     * @param {string} type
      */
-    this.registerEvent = function(eventName) {
-        _handler[eventName] = [];
-    };
-
-    this.registerHandler = function(event, handler) {
-
-    };
-
-    if (Array.isArray(eventNames)) {
-        for (var i = 0, len = eventNames.length; i < len; i++) {
-            this.registerEvent(eventNames[i]);
+    this.registerEvent = function(eventName, type) {
+        if (this._events.hasOwnProperty(eventName)) {
+            throw 'event already registered';
         }
-    }
+
+        this._events[eventName] = createEvent(eventName, type);
+    };
+
+    /**
+     * Returns handles for given event name
+     * @returns {Event[]}
+     */
+    this.getEvents = function() {
+        return this._events;
+    };
+
+    /**
+     * Register a handler for a event
+     * @param {string} event
+     * @param {function} handler
+     */
+    this.registerHandler = function(event, handler) {
+    };
+
+    /**
+     * Returns handles for given event name
+     * @param {string} eventName
+     * @returns {function[]}
+     */
+    this.getHandler = function(eventName) {
+    };
 };
