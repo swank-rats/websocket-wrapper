@@ -93,4 +93,21 @@ describe('#handler', function() {
         expect(handlerList.length).to.be.equal(1);
         expect(handlerList[0]).to.be.eql(eventHandler);
     });
+
+    it('register-multiple', function() {
+        var eventHandler1 = function() {
+            return 'test-1';
+        }, eventHandler2 = function() {
+            return 'test-2';
+        }, handlerList;
+
+        testEvent.register(eventHandler1);
+        testEvent.register(eventHandler2);
+
+        handlerList = testEvent.getHandler();
+
+        expect(handlerList.length).to.be.equal(2);
+        expect(handlerList[0]).to.be.eql(eventHandler1);
+        expect(handlerList[1]).to.be.eql(eventHandler2);
+    });
 });
