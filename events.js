@@ -86,6 +86,14 @@ Event.prototype.register = function(handler) {
     this._handlers.push(handler);
 };
 
+/**
+ * Returns all handler for this event
+ * @returns {Array}
+ */
+Event.prototype.getHandler = function() {
+    return this._handlers;
+};
+
 VoterEvent.prototype = Object.create(Event.prototype);
 VoterEvent.prototype.constructor = Event;
 
@@ -122,15 +130,23 @@ module.exports = function() {
             throw 'event already registered';
         }
 
-        this._events[eventName] = createEvent(eventName, type);
+        return this._events[eventName] = createEvent(eventName, type);
     };
 
     /**
-     * Returns handles for given event name
+     * Returns all events
      * @returns {Event[]}
      */
     this.getEvents = function() {
         return this._events;
+    };
+
+    /**
+     * Returns event for given event name
+     * @returns {Event}
+     */
+    this.getEvent = function(name) {
+        return this._events[name];
     };
 
     /**
@@ -139,13 +155,15 @@ module.exports = function() {
      * @param {function} handler
      */
     this.registerHandler = function(event, handler) {
+        this.getEvent(event).register(handler);
     };
 
     /**
-     * Returns handles for given event name
-     * @param {string} eventName
+     * Returns handlers for given event name
+     * @param {string} event
      * @returns {function[]}
      */
-    this.getHandler = function(eventName) {
+    this.getHandler = function(event) {
+        this.getEvent(event).getHandler();
     };
 };

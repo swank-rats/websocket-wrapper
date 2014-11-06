@@ -23,8 +23,8 @@ module.exports = function(grunt) {
             all: ['test/*.js']
         },
         watch: {
-            files: ['Gruntfile.js', 'src/**/*.js', 'test/*.js'],
-            tasks: ['jshint', 'mocha']
+            files: ['Gruntfile.js', '*.js', 'test/*.js'],
+            tasks: ['test']
         }
     });
 
