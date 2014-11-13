@@ -64,6 +64,24 @@ var
     VoterEvent = function(name) {
         Event.call(this, name, EVENT_TYPE_VOTER);
 
+        /**
+         * Grant return value
+         * @type {string}
+         */
+        this.GRANTED = 'GRANTED';
+
+        /**
+         * Deny return value
+         * @type {string}
+         */
+        this.DENIED = 'DENIED';
+
+        /**
+         * Abstain return value
+         * @type {string}
+         */
+        this.ABSTAIN = 'ABSTAIN';
+
         return this;
     },
 
@@ -96,9 +114,20 @@ Event.prototype.fire = function(parameter) {
     }
     parameter.unshift(this);
 
+    return this._fire(parameter);
+};
+
+/**
+ * Simple fire implementation can be overridden by concrete event
+ * @param {array} parameter
+ * @private
+ */
+Event.prototype._fire = function(parameter) {
     this._handlers.forEach(function(handler) {
         handler.apply(null, parameter);
     });
+
+    return null;
 };
 
 /**
@@ -111,6 +140,21 @@ Event.prototype.getHandler = function() {
 
 VoterEvent.prototype = Object.create(Event.prototype);
 VoterEvent.prototype.constructor = Event;
+
+/**
+ *
+ * @param {array} parameter
+ * @private
+ */
+VoterEvent.prototype._fire = function(parameter) {
+    var result;
+
+    this._handlers.forEach(function(handler) {
+        handler.apply(null, parameter);
+    });
+
+    return result;
+};
 
 InformEvent.prototype = Object.create(Event.prototype);
 InformEvent.prototype.constructor = Event;
