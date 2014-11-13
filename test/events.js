@@ -86,7 +86,7 @@ describe('#handler', function() {
             return 'test';
         }, handlerList;
 
-        testEvent.register(eventHandler);
+        testEvent.registerHandler(eventHandler);
 
         handlerList = testEvent.getHandler();
 
@@ -101,8 +101,8 @@ describe('#handler', function() {
             return 'test-2';
         }, handlerList;
 
-        testEvent.register(eventHandler1);
-        testEvent.register(eventHandler2);
+        testEvent.registerHandler(eventHandler1);
+        testEvent.registerHandler(eventHandler2);
 
         handlerList = testEvent.getHandler();
 

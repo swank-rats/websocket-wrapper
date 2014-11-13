@@ -79,11 +79,26 @@ var
     };
 
 /**
- * Register an event to the event
+ * Register an handler to the event
  * @param {function} handler
  */
-Event.prototype.register = function(handler) {
+Event.prototype.registerHandler = function(handler) {
     this._handlers.push(handler);
+};
+
+/**
+ * Fire event
+ * @param {array} parameter
+ */
+Event.prototype.fire = function(parameter) {
+    if (!parameter) {
+        parameter = [];
+    }
+    parameter.unshift(this);
+
+    this._handlers.forEach(function(handler) {
+        handler.apply(null, parameter);
+    });
 };
 
 /**
@@ -155,7 +170,7 @@ module.exports = function() {
      * @param {function} handler
      */
     this.registerHandler = function(event, handler) {
-        this.getEvent(event).register(handler);
+        this.getEvent(event).registerHandler(handler);
     };
 
     /**
@@ -165,5 +180,14 @@ module.exports = function() {
      */
     this.getHandler = function(event) {
         this.getEvent(event).getHandler();
+    };
+
+    /**
+     * Fire event with given name
+     * @param {string} event
+     * @param {array} parameter
+     */
+    this.fire = function(event, parameter) {
+        this.getEvent(event).fire(parameter);
     };
 };
