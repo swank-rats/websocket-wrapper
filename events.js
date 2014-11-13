@@ -147,11 +147,17 @@ VoterEvent.prototype.constructor = Event;
  * @private
  */
 VoterEvent.prototype._fire = function(parameter) {
-    var result;
+    var result = this.ABSTAIN, item;
 
     this._handlers.forEach(function(handler) {
-        handler.apply(null, parameter);
-    });
+        item = handler.apply(null, parameter);
+
+        if (item === this.GRANTED && result === this.ABSTAIN) {
+            result = item;
+        } else if (item === this.DENIED) {
+            result = item;
+        }
+    }.bind(this));
 
     return result;
 };
@@ -232,6 +238,6 @@ module.exports = function() {
      * @param {array} parameter
      */
     this.fire = function(event, parameter) {
-        this.getEvent(event).fire(parameter);
+        return this.getEvent(event).fire(parameter);
     };
 };
