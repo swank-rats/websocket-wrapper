@@ -100,23 +100,23 @@ describe('#voter event', function() {
     });
 
     it('vote granted', function() {
-        events.registerHandler('test', function(e) {
-            return e.GRANTED;
+        events.registerHandler('test', function() {
+            return events.EVENT_RESULT_GRANTED;
         });
 
         var result = events.fire('test');
 
-        expect(result).to.be.eql(event.GRANTED);
+        expect(result).to.be.eql(events.EVENT_RESULT_GRANTED);
     });
 
     it('vote abstain', function() {
-        events.registerHandler('test', function(e) {
-            return e.ABSTAIN;
+        events.registerHandler('test', function() {
+            return events.EVENT_RESULT_ABSTAIN;
         });
 
         var result = events.fire('test');
 
-        expect(result).to.be.eql(event.ABSTAIN);
+        expect(result).to.be.eql(events.EVENT_RESULT_ABSTAIN);
     });
 
     it('vote denied', function() {
@@ -131,79 +131,79 @@ describe('#voter event', function() {
 
     it('vote granted/denied', function() {
         events.registerHandler('test', function(e) {
-            return e.GRANTED;
+            return events.EVENT_RESULT_GRANTED;
         });
         events.registerHandler('test', function(e) {
-            return e.DENIED;
+            return events.EVENT_RESULT_DENIED;
         });
 
         var result = events.fire('test');
 
-        expect(result).to.be.eql(event.DENIED);
+        expect(result).to.be.eql(events.EVENT_RESULT_DENIED);
     });
 
     it('vote granted/granted', function() {
         events.registerHandler('test', function(e) {
-            return e.GRANTED;
+            return events.EVENT_RESULT_GRANTED;
         });
         events.registerHandler('test', function(e) {
-            return e.GRANTED;
+            return events.EVENT_RESULT_GRANTED;
         });
 
         var result = events.fire('test');
 
-        expect(result).to.be.eql(event.GRANTED);
+        expect(result).to.be.eql(events.EVENT_RESULT_GRANTED);
     });
 
     it('vote granted/abstain', function() {
         events.registerHandler('test', function(e) {
-            return e.GRANTED;
+            return events.EVENT_RESULT_GRANTED;
         });
         events.registerHandler('test', function(e) {
-            return e.ABSTAIN;
+            return events.EVENT_RESULT_ABSTAIN;
         });
 
         var result = events.fire('test');
 
-        expect(result).to.be.eql(event.GRANTED);
+        expect(result).to.be.eql(events.EVENT_RESULT_GRANTED);
     });
 
     it('vote abstain/granted', function() {
         events.registerHandler('test', function(e) {
-            return e.ABSTAIN;
+            return events.EVENT_RESULT_ABSTAIN;
         });
         events.registerHandler('test', function(e) {
-            return e.GRANTED;
+            return events.EVENT_RESULT_GRANTED;
         });
 
         var result = events.fire('test');
 
-        expect(result).to.be.eql(event.GRANTED);
+        expect(result).to.be.eql(events.EVENT_RESULT_GRANTED);
     });
 
     it('vote abstain/denied', function() {
         events.registerHandler('test', function(e) {
-            return e.ABSTAIN;
+            return events.EVENT_RESULT_ABSTAIN;
         });
         events.registerHandler('test', function(e) {
-            return e.DENIED;
+            return events.EVENT_RESULT_DENIED;
         });
 
         var result = events.fire('test');
 
-        expect(result).to.be.eql(event.DENIED);
+        expect(result).to.be.eql(events.EVENT_RESULT_DENIED);
     });
 
     it('vote abstain/abstain', function() {
         events.registerHandler('test', function(e) {
-            return e.ABSTAIN;
+            return events.EVENT_RESULT_ABSTAIN;
         });
         events.registerHandler('test', function(e) {
-            return e.ABSTAIN;
+            return events.EVENT_RESULT_ABSTAIN;
         });
 
         var result = events.fire('test');
 
-        expect(result).to.be.eql(event.ABSTAIN);
+        expect(result).to.be.eql(events.EVENT_RESULT_ABSTAIN);
     });
 });

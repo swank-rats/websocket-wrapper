@@ -1,18 +1,9 @@
 var Websocket = require('ws').Server,
+    Events = require('./events'),
 
-    /**
-     * Container for caching listener
-     * @type {Object[]}
-     * @private
-     */
-    _listener = {},
-
-    /**
-     * Websocket Instance
-     * @type {Websocket}
-     * @private
-     */
-    _ws,
+    EVENT_PRE_MESSAGE = 'pre_message',
+    EVENT_MESSAGE = 'message',
+    EVENT_CONNECTION = 'connection',
 
     /**
      * Generate uuid for client
@@ -38,6 +29,7 @@ var Websocket = require('ws').Server,
         } catch (e) {
             return false;
         }
+
         return true;
     },
 
@@ -46,39 +38,44 @@ var Websocket = require('ws').Server,
      * @param {Object} config
      */
     init = function(config) {
-        _ws = new Websocket(config);
+        this._ws = new Websocket(config);
 
-        _ws.on('connection', function(socket) {
-            onConnection(_ws, socket);
-        });
+        this._ws.on('connection', function(socket) {
+            onConnection.call(this, socket);
+        }.bind(this));
+
+        this._events.registerEvent(EVENT_PRE_MESSAGE, this._events.EVENT_TYPE_VOTER);
+        this._events.registerEvent(EVENT_MESSAGE, this._events.EVENT_TYPE_INFORM);
+        this._events.registerEvent(EVENT_CONNECTION, this._events.EVENT_TYPE_INFORM);
     },
 
     /**
      * Stops websocket server
      */
     stop = function() {
-        _ws.close();
+        this._ws.close();
     },
 
     /**
      * Handles connection of new socket
-     * @param {Websocket} ws
      * @param {Object} socket
      */
-    onConnection = function(ws, socket) {
+    onConnection = function(socket) {
         socket.id = guid();
 
+        this._events.fire(EVENT_CONNECTION, [socket]);
+
         socket.on('message', function(message) {
-            onMessage(socket, message);
-        });
+            onMessage.call(this, socket, message);
+        }.bind(this));
 
         socket.on('close', function() {
-            onClose(socket);
-        });
+            onClose.call(this, socket);
+        }.bind(this));
     },
 
     /**
-     * Parses message and delegate to _listener
+     * Parses message and delegate to listener
      * @param {Object} socket
      * @param {String} message
      */
@@ -88,13 +85,21 @@ var Websocket = require('ws').Server,
             return;
         }
 
-        var data = JSON.parse(message),
-            cmd = data.cmd || 'default';
+        var data = JSON.parse(message), result;
+        data.cmd = data.cmd || 'default';
 
-        if (!!data.to && !!_listener.hasOwnProperty(data.to)) {
-            _listener[data.to][cmd](socket, data.params || {}, data.data || {});
-        } else {
-            console.warn('message ignored');
+        result = this._events.fire(EVENT_PRE_MESSAGE, [data]);
+
+        if (result === this._events.EVENT_RESULT_ABSTAIN || result === this._events.EVENT_RESULT_GRANTED) {
+            console.log(data);
+            console.log(this._listener);
+            if (!!data.to && !!this._listener.hasOwnProperty(data.to)) {
+                this._listener[data.to][data.cmd](socket, data.params || {}, data.data || {});
+            } else {
+                console.warn('message ignored');
+            }
+        }else{
+            console.warn('message not granted');
         }
     },
 
@@ -106,6 +111,26 @@ var Websocket = require('ws').Server,
     };
 
 module.exports = function(config) {
+    /**
+     * Eventcontainer
+     * @type {object}
+     * @private
+     */
+    this._events = new Events();
+
+    /**
+     * Container for caching listener
+     * @type {Object[]}
+     * @private
+     */
+    this._listener = {};
+
+    /**
+     * Websocket Instance
+     * @type {Websocket}
+     * @private
+     */
+    this._ws;
 
     /**
      * Register listener for websockets library
@@ -113,8 +138,9 @@ module.exports = function(config) {
      * @param {Object} listener
      */
     this.registerListener = function(name, listener) {
-        _listener[name] = listener;
-    };
+        console.log(name);
+        this._listener[name] = listener;
+    }.bind(this);
 
     /**
      * Register a handle for following events:
@@ -125,27 +151,24 @@ module.exports = function(config) {
      * @param {function} handler
      */
     this.registerHandler = function(eventName, handler) {
-        if (!_handler.hasOwnProperty(eventName)) {
-            Console.warn('Event '+eventName + ' does not exists!');
-            return;
-        }
-        _handler[eventName].push(handler);
-    };
+    }.bind(this);
 
     /**
      * Returns listener array
      * @returns {Object[]}
      */
     this.getListener = function() {
-        return _listener;
-    };
+        return this._listener;
+    }.bind(this);
 
     /**
      * Stops current websocket server
      */
     this.stop = function() {
-        stop();
-    };
+        stop.call(this);
+    }.bind(this);
 
-    init(config);
+    init.call(this, config);
+
+    return this;
 };

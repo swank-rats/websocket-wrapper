@@ -12,6 +12,24 @@ var
     EVENT_TYPE_INFORM = 'inform',
 
     /**
+     * GRANTED return value
+     * @type {string}
+     */
+    EVENT_RESULT_GRANTED = 'GRANTED',
+
+    /**
+     * DENIED return value
+     * @type {string}
+     */
+    EVENT_RESULT_DENIED = 'DENIED',
+
+    /**
+     * ABSTAIN return value
+     * @type {string}
+     */
+    EVENT_RESULT_ABSTAIN = 'ABSTAIN',
+
+    /**
      * Factory for event objects
      * @param {string} name
      * @param {string} type
@@ -63,24 +81,6 @@ var
      */
     VoterEvent = function(name) {
         Event.call(this, name, EVENT_TYPE_VOTER);
-
-        /**
-         * Grant return value
-         * @type {string}
-         */
-        this.GRANTED = 'GRANTED';
-
-        /**
-         * Deny return value
-         * @type {string}
-         */
-        this.DENIED = 'DENIED';
-
-        /**
-         * Abstain return value
-         * @type {string}
-         */
-        this.ABSTAIN = 'ABSTAIN';
 
         return this;
     },
@@ -147,14 +147,14 @@ VoterEvent.prototype.constructor = Event;
  * @private
  */
 VoterEvent.prototype._fire = function(parameter) {
-    var result = this.ABSTAIN, item;
+    var result = EVENT_RESULT_ABSTAIN, item;
 
     this._handlers.forEach(function(handler) {
         item = handler.apply(null, parameter);
 
-        if (item === this.GRANTED && result === this.ABSTAIN) {
+        if (item === EVENT_RESULT_GRANTED && result === EVENT_RESULT_ABSTAIN) {
             result = item;
-        } else if (item === this.DENIED) {
+        } else if (item === EVENT_RESULT_DENIED) {
             result = item;
         }
     }.bind(this));
@@ -171,12 +171,30 @@ module.exports = function() {
      * @type {string}
      */
     this.EVENT_TYPE_VOTER = EVENT_TYPE_VOTER;
+
     /**
      * Constant type inform
      * @type {string}
      */
     this.EVENT_TYPE_INFORM = EVENT_TYPE_INFORM;
 
+    /**
+     * Constant return value granted
+     * @type {string}
+     */
+    this.EVENT_RESULT_GRANTED = EVENT_RESULT_GRANTED;
+
+    /**
+     * Constant return value granted
+     * @type {string}
+     */
+    this.EVENT_RESULT_DENIED = EVENT_RESULT_DENIED;
+
+    /**
+     * Constant return value granted
+     * @type {string}
+     */
+    this.EVENT_RESULT_ABSTAIN = EVENT_RESULT_ABSTAIN;
 
     /**
      * Container for events
