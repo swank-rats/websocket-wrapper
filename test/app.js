@@ -1,8 +1,8 @@
 var chai = require('chai'),
     sinonChai = require('sinon-chai'),
     ws = require('ws'),
-    http= require('http'),
-    Websocket = require('../app'),
+    http = require('http'),
+    Websocket = require('../app').WebsocketWrapper,
     expect = require('chai').expect;
 
 chai.should();
@@ -30,7 +30,7 @@ describe('#start', function() {
     });
 
     it('config with server', function(done) {
-       var httpServer = http.createServer().listen(8080, '127.0.0.1');
+        var httpServer = http.createServer().listen(8080, '127.0.0.1');
 
         websocket = new Websocket({server: httpServer});
 
@@ -49,13 +49,8 @@ describe('#start', function() {
 describe('#listener', function() {
     var websocket, wsInstance;
 
-    beforeEach(function(done) {
-        wsInstance = new ws('ws://localhost:8080');
+    beforeEach(function() {
         websocket = new Websocket({port: 8080});
-
-        wsInstance.on('open', function() {
-            done();
-        });
     });
 
     afterEach(function() {
@@ -69,8 +64,9 @@ describe('#listener', function() {
             },
             listener;
 
-        websocket.registerListener('echo', echoListener);
-        listener = websocket.getListener();
+        websocket.listener.add('echo', echoListener);
+
+        listener = websocket.listener.get();
 
         expect(listener).not.to.be.null;
         expect(listener).to.have.property('echo');
@@ -79,14 +75,23 @@ describe('#listener', function() {
 
     it('default callback', function(done) {
         var echoListener = {
-            default: function() {
-                done();
-            }
-        };
+                default: function() {
+                    done();
+                }
+            },
+            listener;
 
-        websocket.registerListener('test', echoListener);
+        websocket.listener.add('test', echoListener);
 
-        wsInstance.send(JSON.stringify({to: 'test'}));
+        listener = websocket.listener.get();
+        expect(listener).not.to.be.null;
+        expect(listener).to.have.property('test');
+        expect(listener.test).to.be.equal(echoListener);
+
+        wsInstance = new ws('ws://localhost:8080');
+        wsInstance.on('open', function() {
+            wsInstance.send(JSON.stringify({to: 'test'}));
+        });
 
         setTimeout(function() {
             done('default not called');
@@ -104,7 +109,7 @@ describe('#listener', function() {
             }
         };
 
-        websocket.registerListener('test', echoListener);
+        websocket.listener.add('test', echoListener);
 
         wsInstance.send(JSON.stringify({to: 'test', cmd: 'test'}));
 
@@ -128,7 +133,7 @@ describe('#listener', function() {
             }
         };
 
-        websocket.registerListener('test', echoListener);
+        websocket.listener.add('test', echoListener);
 
         wsInstance.send(JSON.stringify({to: 'test', params: [1, 2, 3], data: 'testdata'}));
 
@@ -144,7 +149,7 @@ describe('#listener', function() {
             }
         };
 
-        websocket.registerListener('test', echoListener);
+        websocket.listener.add('test', echoListener);
 
         wsInstance.on('message', function(message) {
             expect(message).to.be.eql('testdata');
@@ -166,6 +171,7 @@ describe('#listener', function() {
 
     beforeEach(function(done) {
         websocket = new Websocket({port: 8080});
+
         wsInstance1 = new ws('ws://localhost:8080');
 
         wsInstance1.on('open', function() {
@@ -185,13 +191,13 @@ describe('#listener', function() {
         wsInstance1.on('message', function(message) {
             expect(message).to.be.eql('testdata');
 
-            wsInstance2.on('message', function(message) {
-                expect(message).to.be.eql('testdata');
-
-                done();
-            });
-
             wsInstance2.send(JSON.stringify({to: 'test', data: message}));
+        });
+
+        wsInstance2.on('message', function(message) {
+            expect(message).to.be.eql('testdata');
+
+            done();
         });
 
         wsInstance1.send(JSON.stringify({to: 'test', data: 'testdata'}));

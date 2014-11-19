@@ -70,8 +70,6 @@ var
          * @private
          */
         this._handlers = [];
-
-        return this;
     },
 
     /**
@@ -81,19 +79,28 @@ var
      */
     VoterEvent = function(name) {
         Event.call(this, name, EVENT_TYPE_VOTER);
-
-        return this;
     },
 
     /**
-     * Prototype for voter-event
+     * Prototype for inform-event
      * @param {String} name
      * @constructor
      */
     InformEvent = function(name) {
         Event.call(this, name, EVENT_TYPE_INFORM);
+    },
 
-        return this;
+    /**
+     * Prototype for event system
+     * @constructor
+     */
+    EventSystem = function() {
+        /**
+         * Container for events
+         * @type {Event[]}
+         * @private
+         */
+        this._events = {};
     };
 
 /**
@@ -165,97 +172,90 @@ VoterEvent.prototype._fire = function(parameter) {
 InformEvent.prototype = Object.create(Event.prototype);
 InformEvent.prototype.constructor = Event;
 
-module.exports = function() {
-    /**
-     * Constant type voter
-     * @type {string}
-     */
-    this.EVENT_TYPE_VOTER = EVENT_TYPE_VOTER;
+/**
+ * Constant type voter
+ * @type {string}
+ */
+EventSystem.prototype.EVENT_TYPE_VOTER = EVENT_TYPE_VOTER;
 
-    /**
-     * Constant type inform
-     * @type {string}
-     */
-    this.EVENT_TYPE_INFORM = EVENT_TYPE_INFORM;
+/**
+ * Constant type inform
+ * @type {string}
+ */
+EventSystem.prototype.EVENT_TYPE_INFORM = EVENT_TYPE_INFORM;
 
-    /**
-     * Constant return value granted
-     * @type {string}
-     */
-    this.EVENT_RESULT_GRANTED = EVENT_RESULT_GRANTED;
+/**
+ * Constant return value granted
+ * @type {string}
+ */
+EventSystem.prototype.EVENT_RESULT_GRANTED = EVENT_RESULT_GRANTED;
 
-    /**
-     * Constant return value granted
-     * @type {string}
-     */
-    this.EVENT_RESULT_DENIED = EVENT_RESULT_DENIED;
+/**
+ * Constant return value granted
+ * @type {string}
+ */
+EventSystem.prototype.EVENT_RESULT_DENIED = EVENT_RESULT_DENIED;
 
-    /**
-     * Constant return value granted
-     * @type {string}
-     */
-    this.EVENT_RESULT_ABSTAIN = EVENT_RESULT_ABSTAIN;
+/**
+ * Constant return value granted
+ * @type {string}
+ */
+EventSystem.prototype.EVENT_RESULT_ABSTAIN = EVENT_RESULT_ABSTAIN;
 
-    /**
-     * Container for events
-     * @type {Object}
-     * @private
-     */
-    this._events = {};
+/**
+ * Register a callable event
+ * @param {string} eventName
+ * @param {string} type
+ */
+EventSystem.prototype.registerEvent = function(eventName, type) {
+    if (this._events.hasOwnProperty(eventName)) {
+        throw 'event ' + eventName + ' already registered';
+    }
 
-    /**
-     * Register a callable event
-     * @param {string} eventName
-     * @param {string} type
-     */
-    this.registerEvent = function(eventName, type) {
-        if (this._events.hasOwnProperty(eventName)) {
-            throw 'event already registered';
-        }
-
-        return this._events[eventName] = createEvent(eventName, type);
-    };
-
-    /**
-     * Returns all events
-     * @returns {Event[]}
-     */
-    this.getEvents = function() {
-        return this._events;
-    };
-
-    /**
-     * Returns event for given event name
-     * @returns {Event}
-     */
-    this.getEvent = function(name) {
-        return this._events[name];
-    };
-
-    /**
-     * Register a handler for a event
-     * @param {string} event
-     * @param {function} handler
-     */
-    this.registerHandler = function(event, handler) {
-        this.getEvent(event).registerHandler(handler);
-    };
-
-    /**
-     * Returns handlers for given event name
-     * @param {string} event
-     * @returns {function[]}
-     */
-    this.getHandler = function(event) {
-        this.getEvent(event).getHandler();
-    };
-
-    /**
-     * Fire event with given name
-     * @param {string} event
-     * @param {array} parameter
-     */
-    this.fire = function(event, parameter) {
-        return this.getEvent(event).fire(parameter);
-    };
+    return this._events[eventName] = createEvent(eventName, type);
 };
+
+/**
+ * Returns all events
+ * @returns {Event[]}
+ */
+EventSystem.prototype.getEvents = function() {
+    return this._events;
+};
+
+/**
+ * Returns event for given event name
+ * @returns {Event}
+ */
+EventSystem.prototype.getEvent = function(name) {
+    return this._events[name];
+};
+
+/**
+ * Register a handler for a event
+ * @param {string} event
+ * @param {function} handler
+ */
+EventSystem.prototype.registerHandler = function(event, handler) {
+    this.getEvent(event).registerHandler(handler);
+};
+
+/**
+ * Returns handlers for given event name
+ * @param {string} event
+ * @returns {function[]}
+ */
+EventSystem.prototype.getHandler = function(event) {
+    this.getEvent(event).getHandler();
+};
+
+/**
+ * Fire event with given name
+ * @param {string} event
+ * @param {array} parameter
+ */
+EventSystem.prototype.fire = function(event, parameter) {
+    return this.getEvent(event).fire(parameter);
+};
+
+module.exports.EventSystem = EventSystem;

@@ -2,7 +2,7 @@ var chai = require('chai'),
     sinonChai = require('sinon-chai'),
     ws = require('ws'),
     http= require('http'),
-    Websocket = require('../app'),
+    Websocket = require('../app').WebsocketWrapper,
     expect = require('chai').expect;
 
 chai.should();
