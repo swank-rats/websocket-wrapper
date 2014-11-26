@@ -52,6 +52,14 @@ var Websocket = require('ws').Server,
  */
 WebsocketWrapper.prototype.stop = function() {
     this._listener.clear();
+
+    for (var i in this._ws.clients) {
+        if (this._ws.clients.hasOwnProperty(i)) {
+            this._ws.clients[i].close();
+        }
+    }
+
+    this._ws.clients = [];
     this._ws.close();
 };
 

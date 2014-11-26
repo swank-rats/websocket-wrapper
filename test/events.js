@@ -1,7 +1,7 @@
 var chai = require('chai'),
     sinonChai = require('sinon-chai'),
-    Events = require('../events'),
-    expect = require('chai').expect;
+    expect = require('chai').expect,
+    Events = require('../events').EventSystem;
 
 chai.should();
 chai.use(sinonChai);

@@ -38,6 +38,7 @@ describe('#call listener', function() {
     it('default callback', function(done) {
         var echoListener = {
                 default: function() {
+                    wsInstance.close();
                     done();
                 }
             },
@@ -63,17 +64,22 @@ describe('#call listener', function() {
     it('command callback', function(done) {
         var echoListener = {
             default: function() {
+                wsInstance.close();
                 done('wrong callback called');
             },
 
             test: function() {
+                wsInstance.close();
                 done();
             }
         };
 
         websocket.addListener('test', echoListener);
 
-        wsInstance.send(JSON.stringify({to: 'test', cmd: 'test'}));
+        wsInstance = new ws('ws://localhost:8080');
+        wsInstance.on('open', function() {
+            wsInstance.send(JSON.stringify({to: 'test', cmd: 'test'}));
+        });
 
         setTimeout(function() {
             done('test not called');
@@ -97,7 +103,10 @@ describe('#call listener', function() {
 
         websocket.addListener('test', echoListener);
 
-        wsInstance.send(JSON.stringify({to: 'test', params: [1, 2, 3], data: 'testdata'}));
+        wsInstance = new ws('ws://localhost:8080');
+        wsInstance.on('open', function() {
+            wsInstance.send(JSON.stringify({to: 'test', params: [1, 2, 3], data: 'testdata'}));
+        });
 
         setTimeout(function() {
             done('test not called');
@@ -113,13 +122,17 @@ describe('#call listener', function() {
 
         websocket.addListener('test', echoListener);
 
+        wsInstance = new ws('ws://localhost:8080');
+        wsInstance.on('open', function() {
+            wsInstance.send(JSON.stringify({to: 'test', data: 'testdata'}));
+        });
+
         wsInstance.on('message', function(message) {
             expect(message).to.be.eql('testdata');
 
+            wsInstance.close();
             done();
         });
-
-        wsInstance.send(JSON.stringify({to: 'test', data: 'testdata'}));
 
         setTimeout(function() {
             done('callback not called');

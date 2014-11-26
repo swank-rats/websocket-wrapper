@@ -37,13 +37,13 @@ describe('#listener', function() {
     });
 
     it('multiple clients', function(done) {
-        var i = 1;
+        var i = 0;
 
         wsInstance1.on('message', function(message) {
             message = JSON.parse(message);
             expect(message.data).to.be.eql('testdata');
 
-            i++;
+            i++;console.log(i);console.log(message);
             if (i === 2) {
                 done();
             }
@@ -53,7 +53,7 @@ describe('#listener', function() {
             message = JSON.parse(message);
             expect(message.data).to.be.eql('testdata');
 
-            i++;
+            i++;console.log(i);console.log(message);
             if (i === 2) {
                 done();
             }
