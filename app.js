@@ -25,7 +25,7 @@ var Websocket = require('ws').Server,
          * Container for caching listener
          * @type {Listener}
          */
-        this.listener = new Listener();
+        this._listener = new Listener();
 
         /**
          * Container of events
@@ -33,8 +33,6 @@ var Websocket = require('ws').Server,
          * @private
          */
         this._events = new Events();
-
-        this._ws.wrapper = {events: this._events, listener: this.listener};
 
         /**
          * Register events
@@ -46,14 +44,33 @@ var Websocket = require('ws').Server,
         /**
          * Connection event handler
          */
-        this._ws.on('connection', _onConnection);
+        this._ws.on('connection', _onConnection.bind(this));
     };
 
 /**
  * Stops current websocket server
  */
 WebsocketWrapper.prototype.stop = function() {
+    this._listener.clear();
     this._ws.close();
+};
+
+/**
+ * Add listener
+ * @param {String} name
+ * @param {Object} listener
+ */
+WebsocketWrapper.prototype.addListener = function(name, listener) {
+    this._listener.add(name, listener);
+};
+
+/**
+ * Returns listener
+ * @param {string} name
+ * @returns {Object}
+ */
+WebsocketWrapper.prototype.getListener = function(name) {
+    return this._listener.get(name);
 };
 
 /**
@@ -62,11 +79,22 @@ WebsocketWrapper.prototype.stop = function() {
  * @private
  */
 var _onConnection = function(socket) {
-    console.log(this);
+    var _ws = this._ws;
 
     socket.id = Util.guid();
 
-    this.wrapper.events.fire(EVENT_CONNECTION, [socket]);
+    /**
+     * Broadcasts a message
+     * @param {String} to
+     * @param {String} cmd
+     * @param {Object} params
+     * @param data
+     */
+    socket.broadcast = function(to, cmd, params, data) {
+        broadcast(_ws, to, cmd, params, data);
+    };
+
+    this._events.fire(EVENT_CONNECTION, [socket]);
 
     socket.on('message', function(message) {
         if (!Util.isJsonString(message)) {
@@ -74,11 +102,11 @@ var _onConnection = function(socket) {
             return;
         }
 
-        _onMessage(socket, message);
+        _onMessage.call(this, socket, message);
     }.bind(this));
 
     socket.on('close', function() {
-        _onClose(socket);
+        _onClose.call(this, socket);
     }.bind(this));
 };
 
@@ -92,16 +120,34 @@ var _onMessage = function(socket, message) {
     var data = JSON.parse(message), result;
     data.cmd = data.cmd || 'default';
 
-    result = this.wrapper_events.fire(EVENT_PRE_MESSAGE, [data]);
+    result = this._events.fire(EVENT_PRE_MESSAGE, [data]);
 
-    if (result !== this.wrapper.events.EVENT_RESULT_DENIED) {
-        if (!!data.to && !!this.wrapper.listener.has(data.to)) {
-            this.wrapper.listener.get(data.to)[data.cmd](socket, data.params || {}, data.data || {});
+    if (result !== this._events.EVENT_RESULT_DENIED) {
+        if (!!data.to && !!this._listener.has(data.to)) {
+            this._listener.get(data.to)[data.cmd](socket, data.params || {}, data.data || {});
         } else {
             console.warn('message ignored');
         }
     } else {
         console.warn('message not granted');
+    }
+};
+
+/**
+ * Broadcasts a message
+ * @param {Websocket} wss
+ * @param {String} to
+ * @param {String} cmd
+ * @param {Object} params
+ * @param data
+ */
+var broadcast = function broadcast(wss, to, cmd, params, data) {
+    var message = {to: to, cmd: cmd, params: params, data: data};
+
+    for (var i in wss.clients) {
+        if (wss.clients.hasOwnProperty(i)) {
+            wss.clients[i].send(JSON.stringify(message));
+        }
     }
 };
 

@@ -1,11 +1,17 @@
-var Listener = function() {
+var
     /**
-     * Listener objects
-     * @type {{}}
+     * Listener object
+     * @type {Object}
      * @private
      */
-    this._listener = {};
-};
+    _listener = {},
+
+    /**
+     * Constructor for listener container
+     * @constructor
+     */
+    Listener = function() {
+    };
 
 /**
  * Add a listener with given name
@@ -13,7 +19,7 @@ var Listener = function() {
  * @param {Object} listener
  */
 Listener.prototype.add = function(name, listener) {
-    this._listener[name] = new Object(listener);
+    _listener[name] = new Object(listener);
 };
 
 /**
@@ -22,7 +28,7 @@ Listener.prototype.add = function(name, listener) {
  * @return {Boolean}
  */
 Listener.prototype.has = function(name) {
-    return this._listener.hasOwnProperty(name);
+    return _listener.hasOwnProperty(name);
 };
 
 /**
@@ -32,10 +38,17 @@ Listener.prototype.has = function(name) {
  */
 Listener.prototype.get = function(name) {
     if (!!name) {
-        return this._listener[name];
+        return _listener[name];
     } else {
-        return this._listener;
+        return _listener;
     }
+};
+
+/**
+ * Clears listener container
+ */
+Listener.prototype.clear = function() {
+    _listener = {};
 };
 
 module.exports.Listener = Listener;
