@@ -43,7 +43,7 @@ describe('#listener', function() {
             message = JSON.parse(message);
             expect(message.data).to.be.eql('testdata');
 
-            i++;console.log(i);console.log(message);
+            i++;
             if (i === 2) {
                 done();
             }
@@ -53,7 +53,7 @@ describe('#listener', function() {
             message = JSON.parse(message);
             expect(message.data).to.be.eql('testdata');
 
-            i++;console.log(i);console.log(message);
+            i++;
             if (i === 2) {
                 done();
             }

@@ -99,7 +99,6 @@
 
         it('no voter', function() {
             var result = events.fire('test');
-
             expect(result).to.be.eql(event.ABSTAIN);
         });
 
