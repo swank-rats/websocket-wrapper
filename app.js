@@ -48,6 +48,13 @@ var Websocket = require('ws').Server,
     };
 
 /**
+ * Register a handler for event
+ */
+WebsocketWrapper.prototype.on = function(name, handler) {
+    this._events.registerHandler(name, handler);
+};
+
+/**
  * Stops current websocket server
  */
 WebsocketWrapper.prototype.stop = function() {
