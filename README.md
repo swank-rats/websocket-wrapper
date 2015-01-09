@@ -98,7 +98,7 @@ __Remark:__ If no `cmd` is defined a `default` callback on the listener is calle
 
 ### Server
 
-* `server.registerListener(name, listener)`: registers new listener
+* `server.addListener(name, listener)`: registers new listener
   * name: name des listener
   * listener: object which includes command functions
 * `server.stop()`: stop websocket server

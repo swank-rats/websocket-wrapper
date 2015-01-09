@@ -45,6 +45,8 @@ var Websocket = require('ws').Server,
          * Connection event handler
          */
         this._ws.on('connection', _onConnection.bind(this));
+
+        return this;
     };
 
 /**
@@ -69,7 +71,6 @@ WebsocketWrapper.prototype.stop = function() {
     this._ws.clients = [];
     this._ws.close();
 };
-
 /**
  * Add listener
  * @param {String} name
