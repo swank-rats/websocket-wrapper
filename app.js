@@ -1,3 +1,5 @@
+'use strict';
+
 var Websocket = require('ws').Server,
     Listener = require('./listener').Listener,
     Events = require('./events').EventSystem,
@@ -6,6 +8,92 @@ var Websocket = require('ws').Server,
     EVENT_PRE_MESSAGE = 'pre_message',
     EVENT_MESSAGE = 'message',
     EVENT_CONNECTION = 'connection',
+
+    /**
+     * Handles closed socket
+     * @param {Object} socket
+     * @private
+     */
+    _onClose = function(socket) {
+    },
+
+    /**
+     * Parses message and delegate to listener
+     * @param {Object} socket
+     * @param {String} message
+     * @private
+     */
+    _onMessage = function(socket, message) {
+        var data = JSON.parse(message), result;
+        data.cmd = data.cmd || 'default';
+
+        result = this._events.fire(EVENT_PRE_MESSAGE, [data]);
+
+        if (result !== this._events.EVENT_RESULT_DENIED) {
+            if (!!data.to && !!this._listener.has(data.to)) {
+                this._listener.get(data.to)[data.cmd](socket, data.params || {}, data.data || {});
+            } else {
+                console.warn('message ignored');
+            }
+        } else {
+            console.warn('message not granted');
+        }
+    },
+
+    /**
+     * Broadcasts a message
+     * @param {Websocket} wss
+     * @param {String} to
+     * @param {String} cmd
+     * @param {Object} params
+     * @param data
+     */
+    broadcast = function broadcast(wss, to, cmd, params, data) {
+        var message = {to: to, cmd: cmd, params: params, data: data};
+
+        for (var i in wss.clients) {
+            if (wss.clients.hasOwnProperty(i)) {
+                wss.clients[i].send(JSON.stringify(message));
+            }
+        }
+    },
+
+    /**
+     * Handles connection of new socket
+     * @param {Object} socket
+     * @private
+     */
+    _onConnection = function(socket) {
+        var _ws = this._ws;
+
+        socket.id = Util.guid();
+
+        /**
+         * Broadcasts a message
+         * @param {String} to
+         * @param {String} cmd
+         * @param {Object} params
+         * @param data
+         */
+        socket.broadcast = function(to, cmd, params, data) {
+            broadcast(_ws, to, cmd, params, data);
+        };
+
+        this._events.fire(EVENT_CONNECTION, [socket]);
+
+        socket.on('message', function(message) {
+            if (!Util.isJsonString(message)) {
+                console.error('message validate error');
+                return;
+            }
+
+            _onMessage.call(this, socket, message);
+        }.bind(this));
+
+        socket.on('close', function() {
+            _onClose.call(this, socket);
+        }.bind(this));
+    },
 
     WebsocketWrapper = function(config) {
         /**
@@ -87,92 +175,6 @@ WebsocketWrapper.prototype.addListener = function(name, listener) {
  */
 WebsocketWrapper.prototype.getListener = function(name) {
     return this._listener.get(name);
-};
-
-/**
- * Handles connection of new socket
- * @param {Object} socket
- * @private
- */
-var _onConnection = function(socket) {
-    var _ws = this._ws;
-
-    socket.id = Util.guid();
-
-    /**
-     * Broadcasts a message
-     * @param {String} to
-     * @param {String} cmd
-     * @param {Object} params
-     * @param data
-     */
-    socket.broadcast = function(to, cmd, params, data) {
-        broadcast(_ws, to, cmd, params, data);
-    };
-
-    this._events.fire(EVENT_CONNECTION, [socket]);
-
-    socket.on('message', function(message) {
-        if (!Util.isJsonString(message)) {
-            console.error('message validate error');
-            return;
-        }
-
-        _onMessage.call(this, socket, message);
-    }.bind(this));
-
-    socket.on('close', function() {
-        _onClose.call(this, socket);
-    }.bind(this));
-};
-
-/**
- * Parses message and delegate to listener
- * @param {Object} socket
- * @param {String} message
- * @private
- */
-var _onMessage = function(socket, message) {
-    var data = JSON.parse(message), result;
-    data.cmd = data.cmd || 'default';
-
-    result = this._events.fire(EVENT_PRE_MESSAGE, [data]);
-
-    if (result !== this._events.EVENT_RESULT_DENIED) {
-        if (!!data.to && !!this._listener.has(data.to)) {
-            this._listener.get(data.to)[data.cmd](socket, data.params || {}, data.data || {});
-        } else {
-            console.warn('message ignored');
-        }
-    } else {
-        console.warn('message not granted');
-    }
-};
-
-/**
- * Broadcasts a message
- * @param {Websocket} wss
- * @param {String} to
- * @param {String} cmd
- * @param {Object} params
- * @param data
- */
-var broadcast = function broadcast(wss, to, cmd, params, data) {
-    var message = {to: to, cmd: cmd, params: params, data: data};
-
-    for (var i in wss.clients) {
-        if (wss.clients.hasOwnProperty(i)) {
-            wss.clients[i].send(JSON.stringify(message));
-        }
-    }
-};
-
-/**
- * Handles closed socket
- * @param {Object} socket
- * @private
- */
-var _onClose = function(socket) {
 };
 
 module.exports.WebsocketWrapper = WebsocketWrapper;
