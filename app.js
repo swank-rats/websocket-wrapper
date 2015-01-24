@@ -33,7 +33,7 @@ var Websocket = require('ws').Server,
             if (!!data.to && !!this._listener.has(data.to)) {
                 this._listener.get(data.to)[data.cmd](socket, data.params || {}, data.data || {});
             } else {
-                console.warn('message ignored');
+                console.warn('message ignored:', data);
             }
         } else {
             console.warn('message not granted');
